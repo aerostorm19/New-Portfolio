@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Abhijit Rai — Systems Engineer · FPGA · Embedded AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;700;900&family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&family=Kanit:wght@300;400;500;600&family=Anton&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ============ FILM GRAIN + VIGNETTE OVERLAY ============ -->
+<canvas id="grain" aria-hidden="true"></canvas>
+<div class="vignette" aria-hidden="true"></div>
+<div class="scanline" aria-hidden="true"></div>
+
+<!-- ============ CURSOR ============ -->
+<div class="cursor" id="cursor"><div class="cursor-dot"></div><div class="cursor-ring"></div></div>
+
+<!-- ============ CINEMATIC LOADER ============ -->
+<div class="loader" id="loader">
+  <!-- Horizontal scan sweep -->
+  <div class="ld-scan" id="ldScan"></div>
+
+  <!-- Central name content -->
+  <div class="ld-content" id="ldContent">
+    <div class="ld-name" id="ldName">
+      <div class="ld-word" id="ldWord1">
+        <span class="lc">A</span><span class="lc">B</span><span class="lc">H</span><span class="lc">I</span><span class="lc">J</span><span class="lc">I</span><span class="lc">T</span>
+      </div>
+      <div class="ld-word ld-word-2" id="ldWord2">
+        <span class="lc lc-s">R</span><span class="lc lc-s">a</span><span class="lc lc-s">i</span><span class="lc lc-s">.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Progress strip — bottom -->
+  <div class="ld-progress-wrap" id="ldProgressWrap">
+    <div class="loader-progress"><div class="loader-bar" id="loaderBar"></div></div>
+    <div class="ld-meta">
+      <span class="ld-pct-wrap"><span id="ldPct">000</span><span class="ld-sep">/100</span></span>
+      <span class="ld-tag kanit" id="ldSysLine">SYS · INIT</span>
+    </div>
+  </div>
+
+  <!-- Split curtains — slide apart on exit -->
+  <div class="ld-curtain ld-curtain-l" id="ldCurtainL"></div>
+  <div class="ld-curtain ld-curtain-r" id="ldCurtainR"></div>
+</div>
+
+<!-- ============ NAVBAR (LIQUID GLASS) ============ -->
+<nav class="nav liquid-glass" id="nav">
+  <div class="nav-brand">
+    <span class="brand-mono">AR</span>
+    <span class="brand-meta kanit">/ SYSTEMS ENGINEER</span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#home" class="nav-link active" data-page="home">Home</a></li>
+    <li><a href="#projects" class="nav-link" data-page="projects">Projects</a></li>
+    <li><a href="#contact" class="nav-link" data-page="contact">Contact</a></li>
+  </ul>
+  <div class="nav-meta">
+    <span class="dot live"></span>
+    <span class="kanit" id="navClock">--:--:-- IST</span>
+  </div>
+</nav>
+
+<!-- ============ HUD CORNERS ============ -->
+<div class="hud hud-tl">
+  <div class="kanit hud-label">SECTOR / 01</div>
+  <div class="hud-id" id="hudSector">HOME · CINEMATIC HERO</div>
+</div>
+<div class="hud hud-tr">
+  <div class="kanit hud-label">LAT · LON</div>
+  <div class="hud-id">18.5204° N / 73.8567° E · PUNE</div>
+</div>
+<div class="hud hud-bl">
+  <div class="kanit hud-label">FRAME</div>
+  <div class="hud-id" id="hudFrame">F-000000</div>
+</div>
+<div class="hud hud-br">
+  <div class="kanit hud-label">CHANNEL</div>
+  <div class="hud-id">AR-CORE / v26.05</div>
+</div>
+
+<!-- ============================================================== -->
+<!-- ============ HERO ============================================ -->
+<!-- ============================================================== -->
+<section class="hero" id="home" data-sector="01 · HERO">
+  <video class="hero-video" autoplay muted loop playsinline preload="auto" id="heroVid">
+    <source src="https://framerusercontent.com/assets/Qc6dhglAiYjaI04EEF5RsqHBU.mp4" type="video/mp4">
+  </video>
+  <div class="hero-grade"></div>
+  <div class="hero-bloom" aria-hidden="true"></div>
+
+  <!-- Huge name — top-left (Nakula-style) -->
+  <div class="hero-name-wrap">
+    <h1 class="hero-name">
+      <span class="hn-line"><span class="hn-inner" id="hnL1">ABHIJIT</span></span>
+      <span class="hn-line"><span class="hn-inner" id="hnL2">RAI<sup class="hn-reg">®</sup></span></span>
+    </h1>
+  </div>
+
+  <!-- Top-right info bar (Nakula-style) -->
+  <div class="hero-info-bar" id="heroInfoBar">
+    <div class="hib-avail">
+      <span class="dot live hib-dot"></span>
+      <div class="hib-avail-txt kanit">Available for work<br><span class="hib-est">EST. 2023</span></div>
+    </div>
+    <div class="hib-time kanit" id="heroTime">--:-- IST</div>
+    <a href="#contact" class="hib-cta kanit">LET'S TALK</a>
+  </div>
+
+  <!-- Right-center: mixed-weight statement (Nakula equivalent) -->
+  <div class="hero-stmt-r" id="heroStmtR">
+    <span class="hsr-l1">Building</span>
+    <span class="hsr-l2 serif-it">technology that</span>
+    <span class="hsr-l3">thinks.</span>
+  </div>
+
+  <!-- Bottom-left: role tag + bio -->
+  <div class="hero-bottom-l" id="heroBottomL">
+    <div class="hbl-tag kanit">ENGINEER · BUILDER · RESEARCHER // INTELLIGENT SYSTEMS · AUTONOMOUS INFRASTRUCTURE · EST 2023</div>
+    <p class="hbl-desc">Engineer, builder, and researcher focused on intelligent <br class="hbl-br">systems, autonomous infrastructure, and the future of computing.</p>
+    <p class="hbl-desc hbl-dim">Currently building. Always learning.</p>
+  </div>
+
+  <!-- Bottom-right: CTA -->
+  <div class="hero-bottom-r" id="heroBottomR">
+    <a href="#projects" class="hbr-cta kanit">START A PROJECT <span class="hbr-arrow">↗</span></a>
+  </div>
+</section>
+
+<!-- ============================================================== -->
+<!-- ============ MANIFESTO · KINETIC TYPOGRAPHY ================== -->
+<!-- ============================================================== -->
+<section class="manifesto" data-sector="01.5 · MANIFESTO">
+  <div class="manifesto-bg" aria-hidden="true"></div>
+  <div class="manifesto-rule" aria-hidden="true"></div>
+  <div class="manifesto-inner">
+    <div class="manifesto-eyebrow">
+      <span class="accent">●</span>
+      <span>// MANIFESTO · ON ENGINEERING</span>
+      <span class="sep" style="margin-left:auto">TRANSMISSION 014</span>
+    </div>
+    <h2 style="margin:0">
+      <span class="manifesto-line" data-kx="-40">ENGINEERING</span>
+      <span class="manifesto-line outline" data-kx="60">THE&nbsp;FUTURE</span>
+      <span class="manifesto-line serif-it" data-kx="-30">of intelligent</span>
+      <span class="manifesto-line" data-kx="40">SYSTEMS.</span>
+    </h2>
+    <div class="manifesto-foot">
+      <div><span class="lbl">DOCTRINE · 01</span><p>The best way to understand a system is to build one.</p></div>
+      <div><span class="lbl">DOCTRINE · 02</span><p>Determinism is a moral position, not a technical one.</p></div>
+      <div><span class="lbl">DOCTRINE · 03</span><p>Most breakthroughs begin as side projects.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================== -->
+<!-- ============ IDENTITY ======================================== -->
+<!-- ============================================================== -->
+<section class="identity" data-sector="02 · IDENTITY">
+
+  <!-- ── full-bleed stage ── -->
+  <div class="id-stage">
+
+    <!-- centered video figure -->
+    <div class="id-figure">
+      <video class="id-fig-vid" autoplay muted loop playsinline preload="metadata">
+        <source src="./assets/aboutme-01.mp4" type="video/mp4">
+      </video>
+      <div class="id-fig-shade"></div>
+    </div>
+
+    <!-- section label top-left -->
+    <div class="id-tag kanit">// 02 &nbsp;·&nbsp; ENGINEERING IDENTITY</div>
+
+    <!-- live badge top-right -->
+    <div class="id-live kanit"><span class="dot live"></span>&nbsp;PUNE, IN · LIVE</div>
+
+    <!-- massive overlaid headline -->
+    <div class="id-headline" aria-hidden="true">
+      <p class="id-hl-1 anton">THE EDGE</p>
+      <p class="id-hl-2 serif-it">is where</p>
+      <p class="id-hl-3 anton">I BUILD.</p>
+    </div>
+
+    <!-- left panel: about -->
+    <div class="id-panel-left">
+      <div class="kanit id-plbl">ABOUT</div>
+      <ul class="id-plist kanit">
+        <li>ABHIJIT RAI</li>
+        <li>ENGINEER · BUILDER · STORYTELLER</li>
+        <li class="id-accent">AIT PUNE · E&amp;TC 2027</li>
+      </ul>
+      <p class="id-bio serif-it">"I'm not the most specialized engineer<br>in any room. But I'll still be building<br>at 2 a.m. because the problem remains unsolved."</p>
+    </div>
+
+    <!-- right panel: metrics -->
+    <div class="id-panel-right">
+      <div class="kanit id-plbl">METRICS</div>
+      <ul class="id-metrics-list">
+        <li><span class="id-mn anton">40+</span><span class="kanit id-ml">PROJECTS</span></li>
+        <li><span class="id-mn anton">5</span><span class="kanit id-ml">HACKATHONS</span></li>
+        <li><span class="id-mn anton">5+</span><span class="kanit id-ml">DOMAINS</span></li>
+        <li><span class="id-mn anton">30+</span><span class="kanit id-ml">SYSTEMS BUILT</span></li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- bio strip — outside the absolute stack so it never overlaps -->
+  <div class="id-bottom-bar">
+    <div class="id-bottom-inner">
+      <p class="id-bottom-bio">I started with software, chased curiosity into hardware and ended up building systems where the two are inseparable embedded devices, signal processing, computer architecture, AI and the infrastructure that powers intelligent machines. </p>
+      <p class="id-bottom-bio">Outside engineering, I make films. I travel alone. I create things most people in my field don't bother with because the people who build the future should also know how to tell its story. </p>
+    </div>
+  </div>
+
+  <!-- mobile-only info block: shows name + metrics + quote that are hidden on small screens -->
+  <div class="id-mobile-info">
+    <div class="id-mi-row">
+      <div class="id-mi-about">
+        <div class="kanit id-plbl">ABOUT</div>
+        <ul class="id-plist kanit">
+          <li>ABHIJIT RAI</li>
+          <li>ENGINEER · BUILDER · STORYTELLER</li>
+          <li class="id-accent">AIT PUNE · E&amp;TC 2027</li>
+          <li class="id-accent">IIT MADRAS · BS DATA SCI. Foundation Course</li>
+        </ul>
+      </div>
+      <div class="id-mi-metrics">
+        <div class="kanit id-plbl">METRICS</div>
+        <ul class="id-metrics-list">
+          <li><span class="id-mn anton">40+</span><span class="kanit id-ml">PROJECTS</span></li>
+          <li><span class="id-mn anton">5</span><span class="kanit id-ml">HACKATHONS</span></li>
+          <li><span class="id-mn anton">5+</span><span class="kanit id-ml">DOMAINS</span></li>
+          <li><span class="id-mn anton">30+</span><span class="kanit id-ml">SYSTEMS BUILT</span></li>
+        </ul>
+      </div>
+    </div>
+    <p class="id-bio serif-it id-mi-quote">"I'm not the most specialized engineer in any room. But I'll still be building at 2 a.m. — because the problem remains unsolved."</p>
+  </div>
+
+  <!-- sponsor-style domain ticker -->
+  <div class="id-ticker-wrap">
+    <div class="id-ticker-track">
+      <span>FPGA SYSTEMS</span><span class="id-tsep">·</span><span>EDGE AI</span><span class="id-tsep">·</span><span>EMBEDDED FIRMWARE</span><span class="id-tsep">·</span><span>SDR PIPELINES</span><span class="id-tsep">·</span><span>RISC-V CORES</span><span class="id-tsep">·</span><span>AGENTIC AI</span><span class="id-tsep">·</span><span>GPU KERNELS</span><span class="id-tsep">·</span><span>DISTRIBUTED SYSTEMS</span><span class="id-tsep">·</span><span>FPGA SYSTEMS</span><span class="id-tsep">·</span><span>EDGE AI</span><span class="id-tsep">·</span><span>EMBEDDED FIRMWARE</span><span class="id-tsep">·</span><span>SDR PIPELINES</span><span class="id-tsep">·</span><span>RISC-V CORES</span><span class="id-tsep">·</span><span>AGENTIC AI</span><span class="id-tsep">·</span><span>GPU KERNELS</span><span class="id-tsep">·</span><span>DISTRIBUTED SYSTEMS</span>
+    </div>
+  </div>
+
+</section>
+
+<!-- ============================================================== -->
+<!-- ============ GALLERY — horizontal scroll ==================== -->
+<!-- ============================================================== -->
+<section class="gal-sec" data-sector="02.5 · GALLERY">
+
+  <div class="gal-track" id="galTrack">
+
+    <!-- ① Large portrait — opener -->
+    <div class="gal-item gal-portrait-lg" style="--gl:6vw;--gt:9vh" data-speed="1.0">
+      <span class="gal-lbl kanit">2026</span>
+      <div class="gal-frame">
+        <img src="./assets/photo-01.jpeg" alt="Photo 01" loading="eager">
+      </div>
+    </div>
+
+    <!-- ② Medium landscape — row 2 -->
+    <div class="gal-item gal-land-md" style="--gl:38vw;--gt:30vh" data-speed="1.04">
+      <span class="gal-lbl kanit">2026</span>
+      <div class="gal-frame">
+        <img src="./assets/photo-02.jpeg" alt="Photo 02" loading="lazy">
+      </div>
+    </div>
+
+    <!-- ③ Small square — bottom left cluster -->
+    <div class="gal-item gal-sq-sm" style="--gl:40vw;--gt:66vh" data-speed="0.96">
+      <div class="gal-frame">
+        <img src="./assets/photo-03.jpeg" alt="Photo 03" loading="lazy">
+      </div>
+    </div>
+
+    <!-- ④ Floating quote 1 -->
+    <div class="gal-float-quote" style="--gl:67vw;--gt:18vh">
+      <p class="serif-it">"It doesn't matter where<br>you start, it's <em>how</em> you<br>build from there."</p>
+      <span class="gal-attr kanit">— A.R. · 2024</span>
+    </div>
+
+    <!-- ⑤ Small square — middle cluster -->
+    <div class="gal-item gal-sq-sm" style="--gl:68vw;--gt:60vh" data-speed="0.93">
+      <span class="gal-lbl kanit">2026</span>
+      <div class="gal-frame">
+        <img src="./assets/photo-04.jpeg" alt="Photo 04" loading="lazy">
+      </div>
+    </div>
+
+    <!-- ⑥ Large portrait — second anchor -->
+    <div class="gal-item gal-portrait-lg" style="--gl:90vw;--gt:7vh" data-speed="1.06">
+      <span class="gal-lbl kanit">2026</span>
+      <div class="gal-frame">
+        <img src="./assets/photo-05.jpeg" alt="Photo 05" loading="lazy">
+      </div>
+    </div>
+
+    <!-- ⑦ Medium portrait — third column -->
+    <div class="gal-item gal-portrait-md" style="--gl:128vw;--gt:16vh" data-speed="1.02">
+      <span class="gal-lbl kanit">2026</span>
+      <div class="gal-frame">
+        <img src="./assets/photo-06.jpeg" alt="Photo 06" loading="lazy">
+      </div>
+    </div>
+
+    <!-- ⑧ Small square — top third cluster -->
+    <div class="gal-item gal-sq-sm" style="--gl:160vw;--gt:10vh" data-speed="0.97">
+      <div class="gal-frame">
+        <img src="./assets/photo-07.jpeg" alt="Photo 07" loading="lazy">
+      </div>
+    </div>
+
+    <!-- ⑨ Large landscape — bottom sweep -->
+    <div class="gal-item gal-land-lg" style="--gl:154vw;--gt:54vh" data-speed="1.05">
+      <div class="gal-frame">
+        <img src="./assets/photo-08.jpeg" alt="Photo 08" loading="lazy">
+      </div>
+    </div>
+
+    <!-- ⑩ Floating quote 2 -->
+    <div class="gal-float-quote" style="--gl:194vw;--gt:32vh">
+      <p class="serif-it">"Hardware-aware AI is going<br>to matter more than<br>bigger models."</p>
+      <span class="gal-attr kanit">— A.R. · 2025</span>
+    </div>
+
+    <!-- ⑪ Large portrait — near end -->
+    <div class="gal-item gal-portrait-lg" style="--gl:212vw;--gt:8vh" data-speed="1.0">
+      <span class="gal-lbl kanit">2026</span>
+      <div class="gal-frame">
+        <img src="./assets/photo-09.jpeg" alt="Photo 09" loading="lazy">
+      </div>
+    </div>
+
+    <!-- ⑫ Medium landscape — bottom end -->
+    <div class="gal-item gal-land-md" style="--gl:210vw;--gt:64vh" data-speed="1.03">
+      <div class="gal-frame">
+        <img src="./assets/photo-10.jpeg" alt="Photo 10" loading="lazy">
+      </div>
+    </div>
+
+    <!-- ⑬ a: Medium square -->
+    <div class="gal-item gal-sq-md" style="--gl:250vw;--gt:20vh" data-speed="0.95">
+      <span class="gal-lbl kanit">2026</span>
+      <div class="gal-frame">
+        <img src="./assets/photo-11.jpeg" alt="Photo 11" loading="lazy">
+      </div>
+    </div>
+
+    <!-- ⑭ Small square — tail -->
+    <div class="gal-item gal-sq-sm" style="--gl:258vw;--gt:58vh" data-speed="1.02">
+      <div class="gal-frame">
+        <img src="./assets/photo-12.jpeg" alt="Photo 12" loading="lazy">
+      </div>
+    </div>
+
+    <!-- ⑮ Portrait — closer -->
+    <div class="gal-item gal-portrait-md" style="--gl:278vw;--gt:12vh" data-speed="0.97">
+      <span class="gal-lbl kanit">2026</span>
+      <div class="gal-frame">
+        <img src="./assets/photo-13.jpeg" alt="Photo 13" loading="lazy">
+      </div>
+    </div>
+
+    <!-- End breathing room -->
+    <div class="gal-end-pad"></div>
+
+  </div><!-- /.gal-track -->
+</section>
+
+<!-- ============================================================== -->
+<!-- ============ TECH STACK ====================================== -->
+<!-- ============================================================== -->
+<section class="stack" data-sector="03 · STACK">
+
+  <!-- Cinematic background video -->
+  <video class="stack-bg-vid" autoplay muted loop playsinline preload="metadata">
+    <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_094145_4a271a6c-3869-4f1c-8aa7-aeb0cb227994.mp4" type="video/mp4">
+  </video>
+  <div class="stack-vid-grade"></div>
+  <div class="stack-top-fade"></div>
+  <div class="stack-bottom-fade"></div>
+
+  <div class="stack-inner">
+
+    <!-- LEFT: header slides in from left -->
+    <div class="stack-lhs">
+      <span class="kanit stack-eyebrow" id="stEyebrow">// 04</span>
+      <h2 class="stack-title" id="stTitle">
+        <span class="st-line1 anton" id="stLine1">TECHNOLOGY</span>
+        <span class="st-line2 serif-it" id="stLine2">Substrate.</span>
+      </h2>
+      <p class="stack-sub" id="stSub">The full layer cake — from bare metal to deployed product.</p>
+      <div class="stack-rule" aria-hidden="true"></div>
+      <p class="stack-meta kanit" id="stMeta">4 DOMAINS · FULL-STACK · SILICON TO CLOUD</p>
+    </div>
+
+    <!-- RIGHT: cards fly in from right -->
+    <div class="stack-rhs">
+      <div class="stack-grid" id="stackGrid">
+
+        <div class="sc" data-idx="0">
+          <div class="sc-top-line"></div>
+          <span class="sc-cat kanit">SYSTEMS</span>
+          <h3 class="sc-title serif-it">Core systems.</h3>
+          <ul class="sc-list">
+            <li>C++ · C · Python · Rust</li>
+            <li>System Design · Linux</li>
+            <li>Computer Architecture · RISC-V</li>
+            <li>Distributed Systems · Performance Engineering</li>
+          </ul>
+        </div>
+
+        <div class="sc" data-idx="1">
+          <div class="sc-top-line"></div>
+          <span class="sc-cat kanit">INTELLIGENCE</span>
+          <h3 class="sc-title serif-it">Intelligent systems.</h3>
+          <ul class="sc-list">
+            <li>PyTorch · OpenCV · LLMs</li>
+            <li>RAG · AI Agents</li>
+            <li>Computer Vision · Edge AI</li>
+            <li>Autonomous Workflows</li>
+          </ul>
+        </div>
+
+        <div class="sc" data-idx="2">
+          <div class="sc-top-line"></div>
+          <span class="sc-cat kanit">COMPUTE</span>
+          <h3 class="sc-title serif-it">Hardware compute.</h3>
+          <ul class="sc-list">
+            <li>FPGA · CUDA · GPU Computing</li>
+            <li>STM32 · ESP32 · ARM</li>
+            <li>RTOS · Embedded Systems</li>
+            <li>Hardware-Software Co-Design</li>
+          </ul>
+        </div>
+
+        <div class="sc" data-idx="3">
+          <div class="sc-top-line"></div>
+          <span class="sc-cat kanit">INFRASTRUCTURE</span>
+          <h3 class="sc-title serif-it">Cloud &amp; distributed.</h3>
+          <ul class="sc-list">
+            <li>FastAPI · Node.js · PostgreSQL</li>
+            <li>Redis · Docker · Kubernetes</li>
+            <li>AWS · CI/CD</li>
+            <li>Cloud &amp; Distributed Platforms</li>
+          </ul>
+        </div>
+
+
+      </div><!-- /.stack-grid -->
+    </div><!-- /.stack-rhs -->
+
+  </div><!-- /.stack-inner -->
+</section>
+
+<!-- ============================================================== -->
+<!-- ============ TIMELINE ======================================== -->
+<!-- ============================================================== -->
+<section class="sj-sec" id="timeline" data-sector="04 · TIMELINE">
+
+  <!-- Full-bleed video — left half -->
+  <div class="sj-portrait-wrap">
+    <video class="sj-portrait" src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260506_031045_0e1165dd-ab48-46e3-ad3d-5fe77f217647.mp4"
+      autoplay muted loop playsinline disablepictureinpicture preload="auto"></video>
+    <div class="sj-portrait-fade"></div>
+  </div>
+
+  <!-- Right content: title + winding spine + entries -->
+  <div class="sj-content">
+    <div class="sj-title-block">
+      <span class="kanit sj-eyebrow">// 04 · CHRONOLOGY</span>
+      <p class="sj-title-line1 anton">MOMENTS THAT</p>
+      <p class="sj-title-line2 serif-it">Defined Me.</p>
+    </div>
+    <!-- JS injects SVG spine + .sj-entry nodes here -->
+    <div class="sj-entries-wrap" id="sjEntriesWrap">
+      <svg class="sj-spine-svg" id="sjSpineSvg" aria-hidden="true"></svg>
+    </div>
+  </div>
+
+</section>
+
+<!-- ============================================================== -->
+<!-- ============ PROJECTS · AETHER CAROUSEL ====================== -->
+<!-- ============================================================== -->
+<section class="projects" id="projects" data-sector="05 · PROJECTS">
+
+  <!-- Section label overlaid on carousel -->
+  <div class="pj-section-label">
+    <span class="kanit">// 05</span>
+    <span class="kanit">SELECTED ENGINEERING PROJECTS</span>
+    <span class="pj-total-badge kanit" id="pjTotalBadge">12 PROJECTS</span>
+  </div>
+
+  <div class="pj-carousel">
+    <!-- BG video layer — populated by JS -->
+    <div class="pj-bg" id="pjBg"></div>
+    <!-- Cinematic grade overlay -->
+    <div class="pj-grad"></div>
+
+    <!-- Main content grid -->
+    <div class="pj-content">
+
+      <!-- LEFT: active project details -->
+      <div class="pj-details-wrap" id="pjDetailsWrap">
+        <span class="pj-cat kanit" id="pjCat">INFRASTRUCTURE</span>
+        <div class="pj-num-row">
+          <span class="pj-num anton" id="pjNum">P·01</span>
+          <div class="pj-num-rule"></div>
+        </div>
+        <h2 class="pj-title anton" id="pjTitle">Kairo</h2>
+        <p class="pj-desc" id="pjDesc">AI Chief-of-Staff for startup founders that processes operational communication across Gmail and Slack to generate focused executive briefings and decision summaries.</p>
+        <div class="pj-chips" id="pjChips">
+          <span>LLMs</span><span>AI Agents</span><span>RAG</span><span>FastAPI</span><span>PostgreSQL</span>
+        </div>
+        <a class="pj-ghlink" id="pjLink" href="https://github.com/aerostorm19/Kairo" target="_blank">
+          <span>↗ View on GitHub</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+      </div>
+
+      <!-- RIGHT: floating card stack — populated by JS -->
+      <div class="pj-cards" id="pjCards"></div>
+
+    </div>
+
+    <!-- Controls footer -->
+    <div class="pj-controls">
+      <div class="pj-arrows">
+        <button class="pj-arrow" id="pjPrev" aria-label="Previous project">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+        </button>
+        <button class="pj-arrow" id="pjNext" aria-label="Next project">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+      <div class="pj-timeline">
+        <div class="pj-timeline-bar" id="pjBar"></div>
+      </div>
+      <div class="pj-idx">
+        <span class="anton pj-idx-cur" id="pjCur">01</span>
+        <span class="pj-idx-sep">/</span>
+        <span class="pj-idx-tot" id="pjTot">12</span>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ============================================================== -->
+<!-- ============ FEATURED CINEMATIC CUTAWAY ====================== -->
+<!-- ============================================================== -->
+<section class="cutaway" data-sector="06 · CUTAWAY">
+  <video class="cut-video" autoplay muted loop playsinline preload="metadata">
+    <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260510_060007_60275ce7-030c-4668-a160-8f364ec537d3.mp4" type="video/mp4">
+  </video>
+  <div class="cut-shade"></div>
+  <div class="cut-inner">
+    <span class="kanit cut-eyebrow">PHILOSOPHY · ON CRAFT</span>
+    <h2 class="cut-quote">
+      <span class="serif-it">"Latency"</span> is the only honest unit
+      of <span class="serif-it">engineering taste.</span>
+    </h2>
+    <div class="cut-attrib kanit">— A.R. · ENGINEERING NOTES · #014</div>
+  </div>
+</section>
+
+<!-- ============================================================== -->
+<!-- ============ CONTACT ========================================= -->
+<!-- ============================================================== -->
+<section class="contact" id="contact" data-sector="13 · CONTACT">
+  <video class="contact-bg" autoplay muted loop playsinline preload="metadata">
+    <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260325_125119_8e5ae31c-0021-4396-bc08-f7aebeb877a2.mp4" type="video/mp4">
+  </video>
+  <div class="contact-shade"></div>
+  <div class="contact-inner">
+    <span class="kanit cut-eyebrow">// 06 · INITIATE CONTACT</span>
+    <h2 class="contact-title">
+      Let's <span class="serif-it">build</span> something
+      that <span class="serif-it">matters.</span>
+    </h2>
+  <p class="contact-sub">
+The most interesting opportunities often begin as conversations.
+</p>
+
+<p>
+Whether you're building a company, exploring new technologies, conducting research, or simply exchanging ideas, I'm always interested in meeting people who care deeply about what they do.
+</p>
+<p>If you're working on something ambitious and believe I can contribute, I'd love to hear from you.
+</p>
+
+    <div class="contact-row">
+      <a class="btn-magnetic" href="mailto:abhijitraiisme@gmail.com"><span>abhijitraiisme@gmail.com</span></a>
+      <a class="btn-ghost" href="https://github.com/aerostorm19" target="_blank"><span>GitHub · aerostorm19</span></a>
+      <a class="btn-ghost" href="https://linkedin.com/in/abhijit-rai-163214280" target="_blank"><span>LinkedIn</span></a>
+      <a class="btn-ghost" href="https://x.com/Abhijit60770464" target="_blank"><span>X · @Abhijit60770464</span></a>
+    </div>
+
+    <div class="contact-meta liquid-glass">
+      <div><span class="kanit lbl">STATUS</span><span><p>
+  Building. Learning.<br>
+  Open to opportunities.
+</p>
+</span></div>
+      <div><span class="kanit lbl">EMAIL</span><span>iamabhijitrai@gmail.com · abhijitraiisme@gmail.com</span></div>
+      <div><span class="kanit lbl">PHONE</span><span>+91 8922063518</span></div>
+      <div><span class="kanit lbl">LOCATION</span><span>Pune · IN · UTC+5:30</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================== -->
+<!-- ============ FOOTER ========================================== -->
+<!-- ============================================================== -->
+<footer class="footer" data-sector="14 · FOOTER">
+  <video class="footer-bg" autoplay muted loop playsinline preload="metadata">
+    <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260429_114316_1c7889ad-2885-410e-b493-98119fee0ddb.mp4" type="video/mp4">
+  </video>
+  <div class="footer-shade"></div>
+
+  <div class="footer-mark anton">ABHI · RAI</div>
+
+  <div class="footer-grid">
+    <div>
+      <div class="kanit foot-lbl">CHANNEL</div>
+      <ul>
+        <li>iamabhijitrai@gmail.com</li>
+        <li>abhijitraiisme@gmail.com</li>
+        <li>+91 8922063518</li>
+        <li>PUNE · IN · UTC+5:30</li>
+      </ul>
+    </div>
+    <div>
+      <div class="kanit foot-lbl">CORE</div>
+      <ul>
+        <li><a href="#home">Home</a></li>
+        <li><a href="#projects">Projects</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="kanit foot-lbl">EXTENDED</div>
+      <ul>
+        <li><a href="#contact">Notes</a></li>
+        <li><a href="#contact">Experiments</a></li>
+        <li><a href="#contact">Contact</a></li>
+        <li><a href="https://drive.google.com/drive/folders/1gfuckI_azBUE_l9eJ7jLKQCBWnFQ4uCd?usp=sharing" target="_blank">CV · LINK</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="kanit foot-lbl">COLOPHON</div>
+      <ul>
+        <li>Designed & built by Abhijit Rai.</li>
+        <li>Next.js · TailwindCSS · Framer Motion</li>
+        <li>Built with curiosity and caffeine.</li>
+        <li>© 2026 Abhijit Rai</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-baseline kanit">
+    <span>SIGNAL ACQUIRED · LINK STABLE</span>
+    <span>END OF TRANSMISSION</span>
+  </div>
+</footer>
+
+<!-- Terminal easter egg overlay -->
+<div class="term-egg" id="termEgg">
+  <div class="term-egg-inner liquid-glass">
+    <div class="term-bar">
+      <div class="term-dots"><span></span><span></span><span></span></div>
+      <div class="kanit">~/abhi/secret · tty.0</div>
+      <button class="term-close" id="termClose">esc to close</button>
+    </div>
+    <div class="term-egg-body" id="termEggBody"></div>
+    <div class="term-egg-input">
+      <span class="t-cmd">$</span><input id="termInput" autocomplete="off" spellcheck="false" placeholder="type 'help' and press enter">
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
